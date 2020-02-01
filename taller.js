@@ -1,93 +1,98 @@
-const url = 'https://rickandmortyapi.com/api/';
-const filtro = document.querySelector('#txtBuscar');
-const btnBuscar = document.querySelector('#buscarPersonaje');
-const contenedor = document.querySelector('.row');
-const next = document.querySelector('#siguiente');
-const prev = document.querySelector('#anterior');
+const url = "https://rickandmortyapi.com/api/";
+const filtro = document.querySelector("#txtBuscar");
+const btnBuscar = document.querySelector("#buscarPersonaje");
+const contenedor = document.querySelector(".row");
+const next = document.querySelector("#siguiente");
+const prev = document.querySelector("#anterior");
+var pagina = 0;
 let personajes = [];
+
 $.ajax({
-  url: `${url}/character`,
-  method: 'GET',
+  url: `${url}/character/?page=1`,
+  method: "GET",
   crossDomain: true,
-  success: function(response){
-      personajes = response.results;
-      personajes.forEach((personaje) => {
-        contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
-      });
+  success: function(response) {
+    personajes = response.results;
+    personajes.forEach(personaje => {
+      contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
+    });
   },
   error: function(error) {
-    console.error('Error trayendo personajes', error);
+    console.error("Error trayendo personajes", error);
   }
 });
 
-btnBuscar.addEventListener('click', function(){
-  contenedor.innerHTML = '';
+btnBuscar.addEventListener("click", function() {
+  contenedor.innerHTML = "";
   let nombre = filtro.value;
   $.ajax({
     url: `${url}/character/?name=${nombre}`,
-    method: 'GET',
+    method: "GET",
     crossDomain: true,
     success: function(response) {
       personajes = response.results;
-      personajes.forEach((personaje) => {
-        contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje)
-      })
+      personajes.forEach(personaje => {
+        contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
+      });
+    },
+    error: function(error) {
+      contenedor.innerHTML = `<div class="alert alert-danger" role="alert">
+        No se encontraron coincidencias con el texto a buscar
+      </div>`;
     }
-  })
+  });
 });
 
-next.addEventListener('click', function(event){
-  event.preventDefault;
-  contenedor.innerHTML = '';
+next.addEventListener("click", function() {
+  contenedor.innerHTML = "";
+  pagina++;
   $.ajax({
-    url: `${url}/character`,
-    method: 'GET',
+    url: `${url}/character/?page=${pagina}`,
+    method: "GET",
     crossDomain: true,
     success: function(response) {
-      $.ajax({
-        url: `${response.info.next}`,
-        method: 'GET',
-        crossDomain: true,
-        success: function(response){
-          personajes = response.results;
-          personajes.forEach((personaje) => {
-            contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
-          })
-        }
-      })
+      personajes = response.results;
+      personajes.forEach(personaje => {
+        contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
+      });
+    },
+    error: function(error) {
+      contenedor.innerHTML = `<div class="alert alert-danger" role="alert">
+        No se encontraron registros
+      </div>`;
     }
-  })
+  });
 });
 
-prev.addEventListener('click', function(){
-  event.preventDefault;
-  contenedor.innerHTML = '';
+prev.addEventListener("click", function() {
+  contenedor.innerHTML = " ";
+  pagina--;
   $.ajax({
-    url: `${url}/character`,
-    method: 'GET',
+    url: `${url}/character/?page=${pagina}`,
+    method: "GET",
     crossDomain: true,
     success: function(response) {
-      if(response.info != " "){
-        $.ajax({
-          url: `${response.info.prev}`,
-          method: 'GET',
-          crossDomain: true,
-          success: function(response){
-            personajes = response.results;
-            personajes.forEach((personaje) => {
-              contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
-            })
-          }
-        })
-      } else {
-        alert('Ya estas en la primera pagina');
-      }
+      personajes = response.results;
+      contenedor.innerHTML = `
+      <div class="alert alert-success" role="alert">
+      Total de registros: ${response.info.count}
+      </div>
+      `;
+      personajes.forEach(personaje => {
+        contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
+      });
+     
+    },
+    error: function(error) {
+      contenedor.innerHTML = `<div class="alert alert-danger" role="alert">
+        No se encontraron registros
+      </div>`;
     }
-  })
+  });
 });
-function mostrarTarjeta(personaje){
+function mostrarTarjeta(personaje) {
   return `
-    <div class="card mx-2" style="width: 300px;">
+    <div class="card mx-2 my-3" style="width: 300px;">
         <img src="${personaje.image}" class="card-img-top">
       <div class="card-body">
         <h5 class="card-title">${personaje.name}</h5>
@@ -99,5 +104,5 @@ function mostrarTarjeta(personaje){
         <li class="list-group-item">Origen: ${personaje.origin.name}</li>
       </ul>
     </div>
-  `
+  `;
 }
