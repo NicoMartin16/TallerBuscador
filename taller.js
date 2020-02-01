@@ -73,11 +73,6 @@ prev.addEventListener("click", function() {
     crossDomain: true,
     success: function(response) {
       personajes = response.results;
-      contenedor.innerHTML = `
-      <div class="alert alert-success" role="alert">
-      Total de registros: ${response.info.count}
-      </div>
-      `;
       personajes.forEach(personaje => {
         contenedor.innerHTML = contenedor.innerHTML + mostrarTarjeta(personaje);
       });
